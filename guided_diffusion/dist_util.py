@@ -38,6 +38,21 @@ def dev(device):
 def load_state_dict(path, backend=None, **kwargs):
     with bf.BlobFile(path, "rb") as f:
         data = f.read()
-    return th.load(io.BytesIO(data), **kwargs)
+    print("Loading model...")
+    
+     # Deserialize with torch
+    checkpoint = th.load(io.BytesIO(data), **kwargs)
+    
+    # Handle case where checkpoint has a nested 'state_dict' key
+    state_dict = checkpoint.get("state_dict", checkpoint)
+
+    # Strip "module." prefix if it exists
+    new_state_dict = {}
+    for k, v in state_dict.items():
+        new_key = k[len("module."):] if k.startswith("module.") else k
+        new_state_dict[new_key] = v
+
+    print("State dict cleaned and ready.")
+    return new_state_dict
 
 

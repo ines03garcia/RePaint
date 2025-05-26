@@ -179,11 +179,15 @@ class ImageDatasetInpa(Dataset):
         out_dict = {}
         if self.local_classes is not None:
             out_dict["y"] = np.array(self.local_classes[idx], dtype=np.int64)
+        
+        if arr_gt.ndim == 2:
+            arr_gt = np.expand_dims(arr_gt, axis=-1)  # Shape: [H, W, 1]
+            arr_mask = np.expand_dims(arr_mask, axis=-1)
 
         if self.return_dict:
             name = os.path.basename(gt_path)
             return {
-                'GT': np.transpose(arr_gt, [2, 0, 1]),
+                'GT': np.transpose(arr_gt, [2, 0, 1]), # Shape: [1, H, W]
                 'GT_name': name,
                 'gt_keep_mask': np.transpose(arr_mask, [2, 0, 1]),
             }
@@ -194,7 +198,7 @@ class ImageDatasetInpa(Dataset):
         with bf.BlobFile(path, "rb") as f:
             pil_image = Image.open(f)
             pil_image.load()
-        pil_image = pil_image.convert("RGB")
+        pil_image = pil_image.convert("L") # RGB
         return pil_image
 
 

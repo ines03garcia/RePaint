@@ -53,8 +53,8 @@ data:
   eval:
     paper_face_mask:
       mask_loader: true
-      gt_path: /data/data-inpainting-RePaint/resized_masked_images
-      mask_path: /data/data-inpainting-RePaint/resized_masks
+      gt_path: /home/csantiago/data/data-inpainting-RePaint/resized_masked_images
+      mask_path: /home/csantiago/data/data-inpainting-RePaint/resized_masks
       image_size: 256
       class_cond: false
       deterministic: false

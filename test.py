@@ -61,15 +61,16 @@ def main(conf: conf_mgt.Default_Conf):
     print("Start", conf['name'])
 
     device = dist_util.dev(conf.get('device'))
-
-
+        
     model, diffusion = create_model_and_diffusion(
         **select_args(conf, model_and_diffusion_defaults().keys()), conf=conf
     )
+
     model.load_state_dict(
         dist_util.load_state_dict(os.path.expanduser(
             conf.model_path), map_location="cpu")
     )
+
     model.to(device)
     if conf.use_fp16:
         model.convert_to_fp16()
@@ -147,7 +148,7 @@ def main(conf: conf_mgt.Default_Conf):
 
         result = sample_fn(
             model_fn,
-            (batch_size, 3, conf.image_size, conf.image_size),
+            (batch_size, 1, conf.image_size, conf.image_size),
             clip_denoised=conf.clip_denoised,
             model_kwargs=model_kwargs,
             cond_fn=cond_fn,
