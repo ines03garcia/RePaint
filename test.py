@@ -79,7 +79,7 @@ def main(conf: conf_mgt.Default_Conf):
     show_progress = conf.show_progress
 
     if conf.classifier_scale > 0 and conf.classifier_path:
-        print("loading classifier...")
+        print("Loading classifier...")
         classifier = create_classifier(
             **select_args(conf, classifier_defaults().keys()))
         classifier.load_state_dict(
@@ -107,7 +107,7 @@ def main(conf: conf_mgt.Default_Conf):
         assert y is not None
         return model(x, t, y if conf.class_cond else None, gt=gt)
 
-    print("sampling...")
+    print("Sampling...")
     all_images = []
 
     dset = 'eval'
@@ -116,8 +116,13 @@ def main(conf: conf_mgt.Default_Conf):
 
     dl = conf.get_dataloader(dset=dset, dsName=eval_name)
 
-    for batch in iter(dl):
+    dl_iter = iter(dl)
+    try:
+        batch = next(dl_iter)
+    except StopIteration:
+        print("No batches available in DataLoader. Likely due to drop_last=True or not enough data.")
 
+    for batch in iter(dl):
         for k in batch.keys():
             if isinstance(batch[k], th.Tensor):
                 batch[k] = batch[k].to(device)
@@ -163,12 +168,12 @@ def main(conf: conf_mgt.Default_Conf):
                    th.ones_like(result.get('gt')) * (1 - model_kwargs.get('gt_keep_mask')))
 
         gt_keep_masks = toU8((model_kwargs.get('gt_keep_mask') * 2 - 1))
-
+        print("Saving images...")
         conf.eval_imswrite(
             srs=srs, gts=gts, lrs=lrs, gt_keep_masks=gt_keep_masks,
             img_names=batch['GT_name'], dset=dset, name=eval_name, verify_same=False)
 
-    print("sampling complete")
+    print("Sampling complete!")
 
 
 if __name__ == "__main__":

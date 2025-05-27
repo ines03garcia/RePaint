@@ -29,4 +29,4 @@ def yamlread(path):
     return yaml.safe_load(txtread(path=path))
 
 def imwrite(path=None, img=None):
-    Image.fromarray(img).save(path)
+    Image.fromarray(img, mode='L').save(path)

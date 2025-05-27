@@ -233,22 +233,18 @@ class GaussianDiffusion:
 
         B, C = x.shape[:2]
         assert t.shape == (B,)
-        print(model)
         model_output = model(x, self._scale_timesteps(t), **model_kwargs)
 
-        assert model_output.shape == (B, C * 2, *x.shape[2:]) # PROBLEM, C isn't doubling, I thik I need to set learn_sigma to true!
-        model_output, model_var_values = th.split(model_output, C, dim=1)
-
         if self.model_var_type == ModelVarType.LEARNED:
+            assert model_output.shape == (B, C * 2, *x.shape[2:])
+            model_output, model_var_values = th.split(model_output, C, dim=1)
             model_log_variance = model_var_values
             model_variance = th.exp(model_log_variance)
-        else:
-            min_log = _extract_into_tensor(
+
+        else:  # Variance not learned and not interval
+            model_log_variance = _extract_into_tensor(
                 self.posterior_log_variance_clipped, t, x.shape
             )
-            max_log = _extract_into_tensor(np.log(self.betas), t, x.shape)
-            frac = (model_var_values + 1) / 2
-            model_log_variance = frac * max_log + (1 - frac) * min_log
             model_variance = th.exp(model_log_variance)
 
         def process_xstart(x):

@@ -36,6 +36,7 @@ def write_images(imgs, img_names, dir_path):
     os.makedirs(dir_path, exist_ok=True)
 
     for image_name, image in zip(img_names, imgs):
+        # If I want to change the name of the image, I have to change this out_path
         out_path = os.path.join(dir_path, image_name)
         imwrite(img=image, path=out_path)
 
@@ -58,13 +59,11 @@ class Default_Conf(NoneDict):
         pass
 
     def get_dataloader(self, dset='train', dsName=None, batch_size=None, return_dataset=False):
-
         if batch_size is None:
             batch_size = self.batch_size
 
         candidates = self['data'][dset]
         ds_conf = candidates[dsName].copy()
-
         if ds_conf.get('mask_loader', False):
             from guided_diffusion.image_datasets import load_data_inpa
             return load_data_inpa(**ds_conf, conf=self)
@@ -84,8 +83,9 @@ class Default_Conf(NoneDict):
         if dset is None:
             dset = self.get_default_eval_name()
 
+        # max_len is a parameter from confs
         max_len = self['data'][dset][name].get('max_len')
-
+        
         if srs is not None:
             sr_dir_path = expanduser(self['data'][dset][name]['paths']['srs'])
             write_images(srs, img_names, sr_dir_path)
