@@ -17,6 +17,7 @@
 import yaml
 import os
 from PIL import Image
+import numpy as np
 
 
 def txtread(path):
@@ -29,4 +30,6 @@ def yamlread(path):
     return yaml.safe_load(txtread(path=path))
 
 def imwrite(path=None, img=None):
-    Image.fromarray(img, mode='L').save(path)
+    if img is not None and path is not None:
+        img = np.squeeze(img, axis=2)
+        Image.fromarray(img, mode='L').save(path)
